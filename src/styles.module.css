@@ -1,0 +1,40 @@
+.background{
+  background-color: #3c564f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.centerkids{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imagecover{
+  display:block;
+  height: 80rem;
+  width: 50rem;
+  overflow: hidden;
+}
+
+.image{
+  position: absolute;
+  height: 100%;
+  left: 50%;
+  transform: translate(-50%);
+  
+}
+
+.title{
+  font-family: Termina, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  -webkit-text-stroke: 0.4rem white;
+  text-stroke: 2px white;
+  color: transparent;
+  font-size: 10rem;
+  display: block;
+  width: 80%;
+  text-align: center;
+
+}
