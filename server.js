@@ -7,12 +7,18 @@ const path = require('path');
 const cheerio = require('cheerio');
 const base64 = require('base64-js');
 require('dotenv').config();
-
+const ElevenLabs = require("elevenlabs-node");
 const app = express();
 const port = 3001;
 
 app.use(cors()); // Enable CORS voor alle routes
 app.use(express.json());
+
+const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
+const voice = new ElevenLabs({
+  apiKey: elevenLabsApiKey, // Your API key from Elevenlabs
+  voiceId: "TX3LPaxmHKxFdv7VOQHJ", // A Voice ID from Elevenlabs
+});
 
 app.get('/proxy-image', async (req, res) => {
   const imageUrl = req.query.url;
@@ -23,7 +29,7 @@ app.get('/proxy-image', async (req, res) => {
     res.set('Content-Type', response.headers.get('content-type'));
     res.send(imageBuffer);
   } catch (error) {
-    console.error('Fout bij het ophalen van de afbeelding:', error);
+    // console.error('Fout bij het ophalen van de afbeelding:', error);
     res.status(500).send('Fout bij het ophalen van de afbeelding');
   }
 });
@@ -51,7 +57,7 @@ app.post('/saveWebpage', async (req, res) => {
       filename
     });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     res.status(500).json({
       success: false,
       message: 'Failed to save webpage.'
@@ -106,53 +112,42 @@ app.get('/extractText', (req, res) => {
       articleImages
     });
   } catch (error) {
-    console.error('Fout bij het ophalen van de HTML:', error);
+    // console.error('Fout bij het ophalen van de HTML:', error);
   }
 });
 
 // Endpoint voor het opslaan van audiobestanden
 app.post('/saveAudio', async (req, res) => {
-  var key   = process.env.ELEVENLABS_API_KEY;
+
   const {
     text,
     fileName
   } = req.body;
 
   try {
-    const options = {
-      method: 'POST',
-      headers: {
-        'xi-api-key': process.env.ELEVENLABS_API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text
-      })
-    };
+    // console.log(filePath)
 
-    // Verzoek naar de text-to-speech API om audiobestand te genereren
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/TX3LPaxmHKxFdv7VOQHJ', options);
-    console.log(response)
-    const base64AudioData =  await response.json(); // Audio gegevens als buffer
-    console.log(base64AudioData)
-    
-    // Base64-decodering
-    const binaryAudioData = base64.toByteArray(base64AudioData);
-    // Pad naar de public-map en bestandsnaam
-    const filePath = path.join(__dirname, 'public', fileName);
+    await voice.textToSpeech({
+      // Required Parameters
+      fileName: 'public/' + fileName, // The name of your audio file
+      textInput: text, // The text you wish to convert to speech
 
-    // Schrijf de audiogegevens naar het bestand
-    fs.writeFile(filePath, binaryAudioData, (err) => {
-      if (err) {
-        console.error('Fout bij het opslaan van het bestand:', err);
-        res.status(500).send('Er is een fout opgetreden bij het opslaan van het bestand.');
-      } else {
-        console.log('Bestand succesvol opgeslagen op:', filePath);
-        res.status(200).send('Bestand succesvol opgeslagen.');
-      }
+      // Optional Parameters
+      // voiceId: "pNInz6obpgDQGcFmaJgB", // A different Voice ID from the default
+      stability: 0.5, // The stability for the converted speech
+      similarityBoost: 0.5, // The similarity boost for the converted speech
+      modelId: "eleven_multilingual_v2", // The ElevenLabs Model ID
+      // style: 1, // The style exaggeration for the converted speech
+      speakerBoost: true // The speaker boost for the converted speech
+    }).then((res) => {
+      console.log(res); 
+      res.status(200).json({
+        success: true,
+        filename
+      });
     });
   } catch (error) {
-    console.error('Fout bij het ophalen van het audiobestand:', error);
+    // console.error('Fout bij het ophalen van het audiobestand:', error);
     res.status(500).send('Er is een fout opgetreden bij het ophalen van het audiobestand.');
   }
 });

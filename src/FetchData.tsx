@@ -30,7 +30,7 @@ export async function fetchData(): Promise<SegmentData> {
     {
       segmentTitle: "Product Details",
       text: "Samsung positions the Galaxy Ring as a smart ring focusing on health tracking rather than overwhelming users with data.",
-      imgUrl: "Product"
+      imgUrl: "Product icarly"
     },
     {
       segmentTitle: "Compatibility and Features",
@@ -155,23 +155,28 @@ export async function fetchData(): Promise<SegmentData> {
   };
 
   const textToSpeech = async (list) => {
+    for (const item of list) {
+      const fileName = item.segmentTitle + ".mp3";
+      const text = item.text;
+      
+      console.log(fileName + ":  " + text)
+  
+      try {
+        // Stuur een POST-verzoek naar de server met de tekst en bestandsnaam
+        const response = await axios.post('http://localhost:3001/saveAudio', { text, fileName });
 
-    const text = "Welcome to our review of Samsung’s innovative Galaxy Ring, the latest entry in the smart ring market.";
-    const fileName = "output.mp3"; // Naam van het audiobestand
-    try {
-      // Stuur een POST-verzoek naar de server met de tekst en bestandsnaam
-      const response = await axios.post('http://localhost:3001/saveAudio', { text, fileName });
-      console.log(response)
-    } catch (error) {
-      console.error('Fout bij het verzenden van het verzoek:', error);
+      } catch (error) {
+        console.error('Fout bij het verzenden van het verzoek:', error);
+      }
     }
-  };
+  }
+  
 
   handleSavePage();
   const article = getTextFromArticle()
   // getscript(article)
   const segments = await GetGifs(TestOutputOpenAi);
-  textToSpeech(segments)
+  // textToSpeech(segments);
 
   return {
     title: "Video",
