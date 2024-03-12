@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import OpenAI from "openai";
+import {continueRender, delayRender } from "remotion";
 
 
 export type SegmentData = {
@@ -150,7 +151,6 @@ export async function fetchData(): Promise<SegmentData> {
         listWithGifs[i].imgUrl = await giflink(segment.imgUrl); // Wait for the URL to be resolved
       }
     }
-
     return listWithGifs;
   };
 
@@ -177,7 +177,6 @@ export async function fetchData(): Promise<SegmentData> {
   // getscript(article)
   const segments = await GetGifs(TestOutputOpenAi);
   // textToSpeech(segments);
-
   return {
     title: "Video",
     segment: segments

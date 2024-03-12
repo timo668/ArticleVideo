@@ -10,9 +10,16 @@ type Props = {
 export const WhiteRectImg: React.FC<Props> = ({title, url}) => {
   const {fps, width, durationInFrames} = useVideoConfig();
 	const frame = useCurrentFrame();
-
+  const animations = {
+    element: {
+      float: `translateX(${1 * Math.sin(frame / 25)}%)`,
+      spring1: spring({ fps, frame, delay: 1 }),
+      spring2: spring({ fps, frame, delay: 9 }),
+      spring3: spring({ fps, frame, delay: 17 })
+    }
+  };
   const gifOrDiv = () => {
-    if (url.endsWith('.gif')) {
+    if (url.endsWith('.gif&ct=g')) {
       return (
         <Gif
           src={url}
@@ -24,10 +31,10 @@ export const WhiteRectImg: React.FC<Props> = ({title, url}) => {
             borderWidth: '4.68px',
             borderColor: 'rgb(0, 0, 255)',
             borderStyle: 'solid',
-            backgroundColor: 'rgb(255, 160, 203)',
+            backgroundColor: 'rgb(235, 235, 235)',
             position: 'absolute',
-            left: '147px',
-            top: '288px',
+            left: '69px',
+            top: '220px',
           }}
         />
       );
@@ -37,16 +44,16 @@ export const WhiteRectImg: React.FC<Props> = ({title, url}) => {
           borderWidth: '4.68px',
           borderColor: 'rgb(0, 0, 255)',
           borderStyle: 'solid',
-          backgroundColor: 'rgb(255, 160, 203)',
+          backgroundColor: 'rgb(235, 235, 235)',
           position: 'absolute',
-          left: '147px',
-          top: '288px',
+          left: '69px',
+          top: '220px',
           width: '622.64px',
           height: '858.64px',
           backgroundImage: `url("${url}")`,
           backgroundPosition: 'center',
           backgroundSize: 'cover'
-      }}></div>
+    }}></div>
       );
     }
   }
@@ -67,18 +74,19 @@ export const WhiteRectImg: React.FC<Props> = ({title, url}) => {
 
       <div>
 
-        {gifOrDiv()}
         <div style={{
-              borderWidth: '4.68px',
-              borderColor: 'rgb(0, 0, 255)',
-              borderStyle: 'solid',
-              backgroundColor: 'rgb(235, 235, 235)',
-              position: 'absolute',
-              left: '69px',
-              top: '220px',
-              width: '622.64px',
-              height: '858.64px',
-        }}></div>
+          borderWidth: '4.68px',
+          borderColor: 'rgb(0, 0, 255)',
+          borderStyle: 'solid',
+          backgroundColor: 'rgb(255, 160, 203)',
+          position: 'absolute',
+          left: '147px',
+          top: '288px',
+          width: '622.64px',
+          height: '858.64px'
+
+      }}></div>
+        {gifOrDiv()}
       </div>
       <div style={{  borderWidth: '10px',
     borderColor: 'rgb(0, 0, 255)',
@@ -106,8 +114,8 @@ export const WhiteRectImg: React.FC<Props> = ({title, url}) => {
                 fontWeight: '600',
                 MozTransform: 'matrix( 1.0109184235253,0,0,0.97558566815949,0,0)',
                 margin: '0',
-                maxWidth: '600px'
-                
+                maxWidth: '600px',
+                transform: `scale(${animations.element.spring1})`
           }}>{title}</p>
         </div>
 

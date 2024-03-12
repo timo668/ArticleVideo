@@ -1,5 +1,6 @@
 import { Gif } from "@remotion/gif";
 import {AbsoluteFill, continueRender, delayRender, Img, spring, useCurrentFrame, useVideoConfig, interpolate, Easing, staticFile, Audio } from 'remotion';
+import { preloadGif } from "@remotion/gif";
 
 
 import {fetchData, SegmentData} from '../../FetchData';
@@ -26,7 +27,7 @@ export const TitleImg: React.FC<Props> = ({title, url}) => {
 	};
 
   const gifOrDiv = () => {
-    if (url.endsWith('.gif')) {
+    if (url.endsWith('.gif&ct=g')) {
       return (
         <Gif
           src={url}

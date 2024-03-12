@@ -18,6 +18,8 @@ export const Remotion = () => {
   const [handle] = useState(() => delayRender());
   const [handle2] = useState(() => delayRender());
   const [handle3] = useState(() => delayRender());
+  const [handle4] = useState(() => delayRender());
+
 
   const [data, setData] = useState(null);
   const [segmentSizes, setSegmentSizes] = useState([]);
@@ -29,6 +31,7 @@ export const Remotion = () => {
   useEffect(() => {
     fetchData().then((SegmentData) => {
       setData(SegmentData);
+      continueRender(handle4);
     });
   }, []);
 
