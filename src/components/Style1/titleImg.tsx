@@ -1,9 +1,6 @@
 import { Gif } from "@remotion/gif";
-import {AbsoluteFill, continueRender, delayRender, Img, spring, useCurrentFrame, useVideoConfig, interpolate, Easing, staticFile, Audio } from 'remotion';
-import { preloadGif } from "@remotion/gif";
-
-
-import {fetchData, SegmentData} from '../../FetchData';
+import { AbsoluteFill, continueRender, delayRender, Img, spring, useCurrentFrame, useVideoConfig, interpolate, Easing, staticFile, Audio } from 'remotion';
+import { MotionBlur } from './MotionBlur';
 
 
 import grid from '../../img/Grid2.png';
@@ -14,17 +11,29 @@ type Props = {
 }
 
 
-export const TitleImg: React.FC<Props> = ({title, url}) => {
-  
-  const {fps, width, durationInFrames} = useVideoConfig();
-	const frame = useCurrentFrame();
+export const TitleImg: React.FC<Props> = ({ title, url }) => {
+
+  const { fps, width, height, durationInFrames } = useVideoConfig();
+  const frame = useCurrentFrame();
+
+  const spr = spring({
+    fps,
+    frame,
+    config: {
+      damping: 200,
+    },
+    durationInFrames: 60,
+  });
+
+  const rotate = interpolate(spr, [0, 1], [Math.PI, 0]);
+  const y = interpolate(spr, [0, 1], [height, 0]);
 
   const animations = {
-    element:{
-      float: `translateY(${ 1  * Math.sin(frame / 25 )}%)`,
-      spring: spring({fps, frame, delay: 1})
+    element: {
+      float: `translateY(${1 * Math.sin(frame / 25)}%)`,
+      spring: spring({ fps, frame, delay: 1 })
     }
-	};
+  };
 
   const gifOrDiv = () => {
     if (url.endsWith('.gif&ct=g')) {
@@ -68,37 +77,36 @@ export const TitleImg: React.FC<Props> = ({title, url}) => {
     }
   }
 
-  return(
+  return (
     <AbsoluteFill style={{
       background: 'white'
     }}>
-            <Audio src={staticFile(title + ".mp3")}/>
+      <Audio src={staticFile(title + ".mp3")} />
 
 
-      <Img  src={grid} style={{
+      <Img src={grid} style={{
         position: 'absolute',
         top: '95px',
         zIndex: 0
       }}></Img>
-      
+
 
       {gifOrDiv()}
 
+      <div style={{
+        transform: `scale(${animations.element.spring})`
 
-      <div style={{
-                  transform: `scale(${animations.element.spring})`
       }}>
-      <div style={{
-        
-            borderWidth: '10px',
-            borderColor: 'rgb(0, 0, 255)',
-            borderStyle: 'solid',
-            position: 'absolute',
-            left: '163px',
-            top: '1318px',
-            width: '641px',
-            height: '397px',
-            
+        <div style={{
+          borderWidth: '10px',
+          borderColor: 'rgb(0, 0, 255)',
+          borderStyle: 'solid',
+          position: 'absolute',
+          left: '163px',
+          top: '1318px',
+          width: '641px',
+          height: '397px',
+
         }}
         ></div>
         <div style={{
@@ -108,19 +116,19 @@ export const TitleImg: React.FC<Props> = ({title, url}) => {
           top: '1265px',
           width: '676px',
           height: '427px',
-          
+
         }}></div>
 
         <div style={{
-            backgroundColor: 'rgb(255, 160, 203)',
-            position: 'absolute',
-            left: '70px',
-            top: '1233px',
-            width: '676px',
-            height: '427px',
-            padding: '15px',
-            display: 'flex',
-            alignItems: 'center'
+          backgroundColor: 'rgb(255, 160, 203)',
+          position: 'absolute',
+          left: '70px',
+          top: '1233px',
+          width: '676px',
+          height: '427px',
+          padding: '15px',
+          display: 'flex',
+          alignItems: 'center'
 
         }}><p style={{
           fontSize: '90px',

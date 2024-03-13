@@ -7,7 +7,7 @@ import {BlueSquareImg} from './components/Style1/blueSquareImg';
 import { Remotion } from "./components/main";
 
 const fps = 30;
-const durationInFrames = fps * 60;
+const durationInFrames = fps * 80;
 
 export const RemotionRoot: React.FC = () => {
 	return (

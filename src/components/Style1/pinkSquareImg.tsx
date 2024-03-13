@@ -1,23 +1,41 @@
 import { AbsoluteFill, continueRender, delayRender, Img, spring, useCurrentFrame, useVideoConfig, interpolate, Easing, staticFile, Audio } from 'remotion';
 import grid from '../../img/Grid1.png';
-import { Gif } from "@remotion/gif";  
-import { preloadGif } from "@remotion/gif";
+import { Gif } from "@remotion/gif";
+import { Square } from './SquareAnimation';
+import { MotionBlur } from './MotionBlur';
+
 
 type Props = {
   title: string;
   url: string;
 }
 export const PinkSquareImg: React.FC<Props> = ({ title, url }) => {
-  const { fps, width, durationInFrames } = useVideoConfig();
+  const { fps, width, height, durationInFrames } = useVideoConfig();
   const frame = useCurrentFrame();
   const animations = {
     element: {
-      float: `translateX(${1 * Math.sin(frame / 25)}%)`,
+      float: `translateX(${10 * Math.sin(frame / 25)}%)`,
       spring: spring({ fps, frame, delay: 1 }),
       spring2: spring({ fps, frame, delay: 9 }),
-      spring3: spring({ fps, frame, delay: 17 })
+      spring3: spring({ fps, frame, delay: 17 }),
+      move: interpolate(frame, [0, 20], [0, 1000], {
+        extrapolateRight: "clamp",
+      }),
+      rotate: interpolate(frame, [0, 20], [90, 0], {
+        extrapolateRight: "clamp",
+      })
     }
   };
+  const spr = spring({
+    fps,
+    frame,
+    config: {
+      damping: 200,
+    },
+    durationInFrames: 60,
+  });
+  const rotate = interpolate(spr, [0, 1], [Math.PI, 0]);
+  const y = interpolate(spr, [0, 1], [height, 0]);
 
   const gifOrDiv = () => {
     if (url.endsWith('.gif&ct=g')) {
@@ -50,7 +68,7 @@ export const PinkSquareImg: React.FC<Props> = ({ title, url }) => {
           backgroundImage: `url("${url}")`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
-          
+
         }}></div>
       );
     }
@@ -60,7 +78,6 @@ export const PinkSquareImg: React.FC<Props> = ({ title, url }) => {
       backgroundColor: '#0000ff',
     }}>
       <Audio src={staticFile(title + ".mp3")} />
-
       <div style={{
         backgroundColor: 'rgb(255, 160, 203)',
         position: 'absolute',
@@ -104,6 +121,7 @@ export const PinkSquareImg: React.FC<Props> = ({ title, url }) => {
           }}></div>
           {gifOrDiv()}
         </div>
+
         <div>
           <div style={{
             backgroundColor: 'rgb(0, 0, 255)',
@@ -139,10 +157,11 @@ export const PinkSquareImg: React.FC<Props> = ({ title, url }) => {
             fontWeight: '600',
             margin: '0',
             wordBreak: 'break-word',
-            
+
           }}>{title}</p></div>
         </div>
       </div>
     </AbsoluteFill>
+
   )
 };

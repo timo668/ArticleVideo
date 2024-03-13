@@ -2,7 +2,6 @@ import { useEffect, useState, Fragment } from 'react';
 import { Audio, random, Sequence, Series, staticFile, continueRender, delayRender } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import { slide } from "@remotion/transitions/slide";
-import { SlideDirection } from "@remotion/transitions/slide";
 import { getAudioData } from "@remotion/media-utils";
 
 import { TitleImg } from "./Style1/titleImg";
@@ -19,7 +18,6 @@ export const Remotion = () => {
   const [handle2] = useState(() => delayRender());
   const [handle3] = useState(() => delayRender());
   const [handle4] = useState(() => delayRender());
-
 
   const [data, setData] = useState(null);
   const [segmentSizes, setSegmentSizes] = useState([]);
@@ -84,7 +82,7 @@ export const Remotion = () => {
       const isLastSegment = i === segmentCount - 1;
       const transitionComponent = !isLastSegment && (
         <TransitionSeries.Transition
-          presentation={slide()}
+          presentation={slide({ direction: "from-right" })}
           timing={linearTiming({ durationInFrames: 10 })}
         />
       );

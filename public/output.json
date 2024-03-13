@@ -1,0 +1,34 @@
+{
+  "script": [
+    {
+      "segmentTitle": "Introduction",
+      "text": "Security researchers have developed an AI worm that can spread between generative AI agents, posing a threat of data theft and spam emails.",
+      "imgUrl": "https://media.wired.com/photos/65e0e13fef1050f96f06c160/master/w_2560%2Cc_limit/security_ai_worm_email_spam.jpg"
+    },
+    {
+      "segmentTitle": "AI Worm Creation",
+      "text": "A group of researchers led by Ben Nassi, Stav Cohen, and Ron Bitton has designed one of the first generative AI worms known as Morris II, inspired by the notorious Morris computer worm of 1988.",
+      "imgUrl": ""
+    },
+    {
+      "segmentTitle": "Demonstration of AI Worm",
+      "text": "The AI worm, Morris II, can infiltrate generative AI systems like email assistants to steal sensitive data and propagate malicious content.",
+      "imgUrl": ""
+    },
+    {
+      "segmentTitle": "Exploiting AI Systems",
+      "text": "The researchers showcased how the AI worm can exploit vulnerabilities in systems such as ChatGPT and Gemini, demonstrating potential risks of connected AI ecosystems.",
+      "imgUrl": ""
+    },
+    {
+      "segmentTitle": "Future Concerns",
+      "text": "While generative AI worms have not been observed in real-world scenarios yet, experts warn that they pose a significant security threat that developers and tech companies need to address.",
+      "imgUrl": ""
+    },
+    {
+      "segmentTitle": "Mitigation Strategies",
+      "text": "Experts suggest employing traditional security measures and developing secure application designs to counter the risk of AI worm attacks.",
+      "imgUrl": ""
+    }
+  ]
+}

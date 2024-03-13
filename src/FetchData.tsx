@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import OpenAI from "openai";
-import {continueRender, delayRender } from "remotion";
 
 
 export type SegmentData = {
@@ -15,57 +14,14 @@ export type SegmentData = {
 
 
 
+
 export async function fetchData(): Promise<SegmentData> {
 
-  const TestOutputOpenAi = [
-    {
-      segmentTitle: "Introduction",
-      text: "Welcome to our review of Samsung’s innovative Galaxy Ring, the latest entry in the smart ring market.",
-      imgUrl: "https://media.wired.com/photos/65dca2b60b13d6820a792b91/master/w_2240,c_limit/Gear-Samsung-Galaxy-Ring-SOURCE-Julian-Chokkattu.jpg"
-    },
-    {
-      segmentTitle: "Background Information",
-      text: "Last month, Samsung announced the Galaxy Ring alongside its Galaxy S24 smartphone series.",
-      imgUrl: "Information"
-    },
-    {
-      segmentTitle: "Product Details",
-      text: "Samsung positions the Galaxy Ring as a smart ring focusing on health tracking rather than overwhelming users with data.",
-      imgUrl: "Product icarly"
-    },
-    {
-      segmentTitle: "Compatibility and Features",
-      text: "According to Samsung's Hon Pak, the Galaxy Ring can be used alongside the Galaxy Watch for richer health insights.",
-      imgUrl: "https://media.wired.com/photos/65dbdef77919bfe534e811be/master/w_1600,c_limit/Gear-Samsung-Galaxy-Ring-(5)_low.jpg"
-    },
-    {
-      segmentTitle: "Innovative Technologies",
-      text: "The Galaxy Ring boasts advanced sensor technology and promises extended battery life for comprehensive sleep insights and heart health monitoring.",
-      imgUrl: "Innovative"
-    },
-    {
-      segmentTitle: "Design and Comfort",
-      text: "Samsung highlights the lightweight and comfortable design of the Galaxy Ring, offering various sizes and color options.",
-      imgUrl: "https://media.wired.com/photos/65dbdef723c08f2f40d93a81/master/w_1600,c_limit/Gear-Samsung-Galaxy-Ring-(1)_low.jpg"
-    },
-    {
-      segmentTitle: "Battery Life",
-      text: "While exact battery life details remain undisclosed, Samsung reassures users of extended usage and ongoing efforts to optimize battery performance.",
-      imgUrl: "Battery"
-    },
-    {
-      segmentTitle: "Compatibility",
-      text: "The Galaxy Ring is exclusively compatible with Android phones, with potential future integration with other Samsung devices.",
-      imgUrl: "Compatibility"
-    }
-  ]
+  const websiteUrl = "https://www.wired.com/story/here-come-the-ai-worms/";
 
   const handleSavePage = async () => {
-
-    var url = "https://www.wired.com/story/samsung-galaxy-ring-mwc-2024/";
-
     try {
-      const response = await axios.post('http://localhost:3001/saveWebpage', { url });
+      const response = await axios.post('http://localhost:3001/saveWebpage', { websiteUrl });
       if (response.data.success) {
         // setSavedFilename(response.data.filename);
       } else {
@@ -77,7 +33,7 @@ export async function fetchData(): Promise<SegmentData> {
   };
 
   const getTextFromArticle = async () => {
-    var filename = "story-samsung-galaxy-ring-mwc-2024-.html";
+    let filename = websiteUrl.replace(/^https?:\/\/(?:www\.)?wired\.com\//, '').replace(/\//g, '-') + ".html";
     const url = 'http://localhost:3001/extractText?filename=';
     const articleeUrl = url + encodeURIComponent(filename);
     const response = await fetch(articleeUrl);
@@ -94,31 +50,37 @@ export async function fetchData(): Promise<SegmentData> {
     data.articleImages.map((item, i) => {
       output += "\n Image " + (i + 2) + ": " + item.alt + " src: " + item.src;
     });
-
     return output;
   }
 
-  const getscript = async (fullArticle) => {
+  const setScript = async (fullArticle) => {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? '';
     const openai = new OpenAI({
       apiKey: OPENAI_API_KEY,
       dangerouslyAllowBrowser: true
     });
-    var prompt = "Rewrite the following news article with a formal tone without the use of emojis. Maximum of 3 sentences in a segment Give each a title segment. Divide the images below in the right place. Only place the SRC When there is No specific image mentioned give 1 keyword for a giphy prompt Create a script for TikTok in JSON format. return only the json. Json formaat: { 'Segment': , 'Script': , 'Image': }"
-
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a helpful assistant designed to output JSON.",
-        },
-        { role: "user", content: prompt + " \n" + fullArticle },
-      ],
-      model: "gpt-4-turbo-preview",
-      response_format: { type: "json_object" },
-    });
-    console.log(completion.choices[0].message.content);
-  }
+    console.log("setting: script")
+    var prompt = "follow the following steps: 1. Rewrite the news article with a formal tone without the use of emojis to a short video script. 2. place the script in a Json format: script [ { 'segmentTitle': , 'text': , 'imgUrl': }] 3. give everything a segmentTitle. 4. Place every image once in the segments let the other empty. ";
+    console.log(fullArticle)
+    try {
+      const completion = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: "You rewrite articles to a script designed to output JSON.",
+          },
+          { role: "user", content: prompt + " \n" + fullArticle },
+        ],
+        model: "gpt-3.5-turbo",
+        response_format: { type: "json_object" },
+      });
+      // Stuur JSON-gegevens naar de server
+      await axios.post('http://localhost:3001/saveJson', JSON.parse(completion.choices[0].message.content));
+      console.log('JSON-bestand succesvol opgeslagen op de server.');
+    } catch (error) {
+      console.error('Fout bij het opslaan van het JSON-bestand:', error);
+    }
+  };
 
   const GetGifs = async (list) => {
     const GIPHY_API_KEY = process.env.GIPHY_API_KEY ?? '';
@@ -134,8 +96,9 @@ export async function fetchData(): Promise<SegmentData> {
 
     const giflink = async (keyword) => {
       try {
+        const keywordApi = keyword.replace(" ", "+");
         const response = await fetch(
-          'https://api.giphy.com/v1/gifs/search?api_key=' + GIPHY_API_KEY + '&q=' + keyword + '&limit=1&offset=0&rating=g&lang=en&bundle=messaging_non_clips'
+          'https://api.giphy.com/v1/gifs/search?api_key=' + GIPHY_API_KEY + '&q=' + keywordApi + '&limit=1&offset=0&rating=g&lang=en&bundle=messaging_non_clips'
         );
         const data = await response.json();
         return data.data[0].images.original.url;
@@ -158,9 +121,7 @@ export async function fetchData(): Promise<SegmentData> {
     for (const item of list) {
       const fileName = item.segmentTitle + ".mp3";
       const text = item.text;
-      
-      console.log(fileName + ":  " + text)
-  
+
       try {
         // Stuur een POST-verzoek naar de server met de tekst en bestandsnaam
         const response = await axios.post('http://localhost:3001/saveAudio', { text, fileName });
@@ -170,15 +131,52 @@ export async function fetchData(): Promise<SegmentData> {
       }
     }
   }
-  
+
+  const getScript = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/getJson');
+      return response.data; // Return the response data
+    } catch (error) {
+      console.error("Error fetching script:", error);
+      throw error; // Rethrow the error for further handling if needed
+    }
+  };
 
   handleSavePage();
-  const article = getTextFromArticle()
-  // getscript(article)
-  const segments = await GetGifs(TestOutputOpenAi);
-  // textToSpeech(segments);
+  
+  //Set True for rewrite script every run.
+  if (false) {
+    setScript(await getTextFromArticle().then(article => {
+      console.log(article)
+      return article;
+    }).catch(error => {
+      // Handle errors if any
+      console.error("Error fetching article:", error);
+    }));
+  }
+
+  const script = await getScript().then(script => {
+    return script["script"];
+  }).catch(error => {
+    // Handle errors if any
+    console.error("Error fetching script:", error);
+  });
+
+  const segments = await GetGifs(script);
+  console.log(segments)
+  textToSpeech(segments);
+
+
   return {
     title: "Video",
     segment: segments
   };
 }
+
+//To Do:
+// 1. Zorgen dat er alleen een API request naar open ai wordt gedaan als er een nieuwe link is geplaatst.
+// 2. Gihpy automatiseren.
+// 3. Server.JS - Check of json valid is.
+// 5. Root.tsx - automatische lengte van durationInFrames op basis van geluid.
+// 6. Automatische TikTok titel.
+// 7. NPM CLEAN maken

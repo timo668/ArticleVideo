@@ -36,14 +36,15 @@ app.get('/proxy-image', async (req, res) => {
 
 app.post('/saveWebpage', async (req, res) => {
   const {
-    url
+    websiteUrl
   } = req.body;
+  console.log(websiteUrl)
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(websiteUrl);
     // Vervang alleen "https://www.wired.com/" en "/" door "-"
-    const filename = url.replace(/^https?:\/\/(?:www\.)?wired\.com\//, '').replace(/\//g, '-') + ".html";
+    const filename = websiteUrl.replace(/^https?:\/\/(?:www\.)?wired\.com\//, '').replace(/\//g, '-') + ".html";
     const filePath = path.join(__dirname, 'savedPages', filename);
-
+    
     // Controleer of het bestand al bestaat
     if (fs.existsSync(filePath)) {
       return res.status(400).json({
@@ -116,6 +117,37 @@ app.get('/extractText', (req, res) => {
   }
 });
 
+app.post('/saveJson', (req, res) => {
+  const jsonData = req.body; // Ontvang JSON-gegevens van het verzoek
+  console.log('Ontvangen JSON-gegevens:', jsonData); // Log de ontvangen gegevens
+
+  // Voer hier de logica uit om de JSON-gegevens op te slaan
+  const filePath = path.join(__dirname, 'public', 'output.json');
+  fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), (err) => {
+    if (err) {
+      console.error('Fout bij het schrijven van JSON-bestand:', err);
+      res.status(500).send('Fout bij het schrijven van JSON-bestand');
+    } else {
+      console.log('JSON-bestand succesvol opgeslagen:', filePath);
+      res.sendStatus(200); // Stuur een succesreactie terug naar de client
+    }
+  });
+});
+
+app.get('/getJson', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'output.json');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Fout bij het lezen van JSON-bestand:', err);
+      return res.status(500).send('Fout bij het lezen van JSON-bestand');
+    } else {
+      const jsonData = JSON.parse(data);
+      return res.json(jsonData);
+    }
+  });
+});
+
+
 // Endpoint voor het opslaan van audiobestanden
 app.post('/saveAudio', async (req, res) => {
 
@@ -123,10 +155,15 @@ app.post('/saveAudio', async (req, res) => {
     text,
     fileName
   } = req.body;
+  
+  if (fs.existsSync('public/' + fileName)) {
+    return res.status(400).json({
+      success: false,
+      message: 'File already exists.'
+    });
+  }
 
   try {
-    // console.log(filePath)
-
     await voice.textToSpeech({
       // Required Parameters
       fileName: 'public/' + fileName, // The name of your audio file
@@ -155,3 +192,4 @@ app.post('/saveAudio', async (req, res) => {
 app.listen(port, () => {
   console.log(`Proxy-server luistert op http://localhost:${port}`);
 });
+
